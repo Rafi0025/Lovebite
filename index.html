@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tanju's Love Pop-up</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(45deg, #ff5e62, #f9a7bd);
+            font-family: 'Bubblegum Sans', cursive;
+            overflow: hidden;
+        }
+        .popup {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            max-width: 400px;
+            position: relative;
+            animation: bounceIn 0.7s ease-out;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border: 3px solid #ff3366;
+            z-index: 10;
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .popup h2 {
+            color: #ff3366;
+            font-size: 28px;
+            margin: 0 0 25px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .popup h2::before, .popup h2::after {
+            content: '💞';
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+        .btn {
+            padding: 15px 40px;
+            margin: 10px;
+            border: none;
+            border-radius: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 11;
+        }
+        .yes-btn {
+            background: #ff3366;
+            color: white;
+        }
+        .yes-btn:hover {
+            background: #ff6680;
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        .no-btn {
+            background: #333;
+            color: white;
+        }
+        .no-btn:hover {
+            background: #555;
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        .error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(255, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: glitch 0.5s;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .error-text {
+            color: white;
+            font-size: 48px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+            animation: flicker 0.2s infinite;
+        }
+        .error-subtext {
+            color: #ffcccc;
+            font-size: 24px;
+        }
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-5px, 5px); }
+            40% { transform: translate(5px, -5px); }
+            60% { transform: translate(-5px, 5px); }
+            80% { transform: translate(5px, -5px); }
+            100% { transform: translate(0); }
+        }
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .response {
+            margin-top: 25px;
+            font-size: 24px;
+            color: #ff3366;
+            animation: slideIn 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .response::after {
+            content: '💖';
+            animation: pulse 1s infinite;
+        }
+        @keyframes slideIn {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        .hidden {
+            display: none;
+        }
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ff6680;
+            border-radius: 50%;
+            animation: drift 6s linear infinite;
+            opacity: 0.5;
+        }
+        @keyframes drift {
+            0% { transform: translateY(100vh); opacity: 0.5; }
+            100% { transform: translateY(-20px); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    <div class="popup" id="popup">
+        <h2>Hey Tanju! Do you love me?</h2>
+        <button class="btn yes-btn" onclick="handleYes()">Yes</button>
+        <button class="btn no-btn" onclick="handleNo()">No</button>
+        <div class="response hidden" id="response"></div>
+    </div>
+    <div class="error-overlay hidden" id="error">
+        <div class="error-text">Love System Crash!</div>
+        <div class="error-subtext">Error: Heart.exe not responding!</div>
+    </div>
+
+    <script>
+        let noCount = 0;
+
+        // Floating particles
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.animationDuration = Math.random() * 4 + 4 + 's';
+            document.getElementById('particles').appendChild(particle);
+            setTimeout(() => particle.remove(), 6000);
+        }
+        setInterval(createParticle, 300);
+
+        function handleYes() {
+            const popup = document.getElementById('popup');
+            const response = document.getElementById('response');
+            const error = document.getElementById('error');
+            
+            error.classList.add('hidden');
+            response.classList.remove('hidden');
+            response.textContent = "Yeah, of course I love you too baby!";
+            document.querySelectorAll('.btn').forEach(btn => btn.classList.add('hidden'));
+            popup.style.animation = 'bounceIn 0.7s';
+        }
+
+        function handleNo() {
+            const popup = document.getElementById('popup');
+            const error = document.getElementById('error');
+            const response = document.getElementById('response');
+            
+            noCount++;
+            
+            if (noCount < 3) {
+                error.classList.remove('hidden');
+                response.classList.add('hidden');
+                popup.classList.add('hidden'); // Hide popup during error
+                document.body.style.background = 'linear-gradient(45deg, #cc0000, #660000)';
+                setTimeout(() => {
+                    error.classList.add('hidden');
+                    popup.classList.remove('hidden');
+                    popup.querySelector('h2').textContent = "Hey Tanju! Do you love me?";
+                    popup.style.animation = 'bounceIn 0.7s';
+                    document.body.style.background = 'linear-gradient(45deg, #ff5e62, #f9a7bd)';
+                }, 1500);
+            } else {
+                error.classList.add('hidden');
+                popup.classList.remove('hidden');
+                popup.querySelector('h2').textContent = "You didn't love me? 😢";
+                noCount = 0;
+                popup.style.animation = 'bounceIn 0.7s';
+                document.body.style.background = 'linear-gradient(45deg, #ff5e62, #f9a7bd)';
+            }
+        }
+    </script>
+</body>
+</html>
